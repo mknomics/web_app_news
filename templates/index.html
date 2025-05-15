@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+    *
+    {
+        margin:0px;
+        padding:0px;
+    }
+
+    #div1
+    {
+        width:96%;
+        background-color:lightgray;
+        padding-left:2%;
+        padding-right:2%;
+    }
+
+    #response, #sentiment_output, #fed_sentiment_output, #abi_sentiment_output, #combined_sentiment_output
+    {
+        font-family: Arial, sans-serif; /* Font style */
+        font-size: 16px; /* Font size */
+        color: #333333; /* Text color */
+        background-color: #f9f9f9; /* Background color */
+        padding: 10px; /* Padding inside the box */
+        border: 1px solid #ccc; /* Border around the box */
+        border-radius: 5px; /* Rounded corners */
+        margin-top: 15px; /* Margin at the top */
+        white-space: pre-wrap; /* Preserve line breaks in the text */
+        word-wrap: break-word; /* Allow long words to break and wrap */
+        width: 100%; /* Full width */
+        height: 150px; /* Set height */
+        box-sizing: border-box; /* Include padding and border in the element's total width and height */
+    }
+
+    #sentiment_output, #fed_sentiment_output, #abi_sentiment_output, #combined_sentiment_output
+    {
+        resize: none; /* Prevent resizing */
+    }
+
+    </style>
+    <title>Current Market Insights</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Current Insights</h1>
+    <p>The report below is generated from the BLS Labor Market Report, Remarks from the Chairman of the Federal Reserve, Architectural Billings Index, and Construction Report</p>
+
+    <h2 style="margin-top: 40px;">I. Individual Report Summaries</h2>
+    <h3 style="margin-top: 20px;">Summary of Labor Market Report: (it takes about 5 seconds to process.  Text will appear)</h3>
+    <textarea id="sentiment_output" readonly></textarea>
+
+    <h3 style="margin-top: 20px;">Summary of the Federal Reserve Press Release: (Text will appear)</h3>
+    <textarea id="fed_sentiment_output" readonly></textarea>
+
+    <h3 style="margin-top: 20px;">Summary of the Architectural Billings Index and ABI Construction Report: (Text will appear)</h3>
+    <textarea id="abi_sentiment_output" readonly></textarea>
+
+    <h2 style="margin-top: 40px;">II. Combined Analysis of All Reports</h2>
+
+    <h3 style="margin-top: 20px;">How will these market conditions impact the demand for chainlink fence this quarter? (Text will appear)</h3>
+    <textarea id="combined_sentiment_output" readonly></textarea>
+
+    <h2 style="margin-top: 40px;">III. Ask Your Own Question and Get an Answer</h2>
+    <h3 style="margin-top: 30px">Type your own query in the box below</h3>
+    <textarea id="system_message" rows="4" cols="50"></textarea><br>
+    <button onclick="generateResponse()">Generate Response</button>
+
+    <h2 style="margin-top: 10px;">Query Results</h2>
+    <p> Text is created by Generative AI based on the most current Reports. </p>
+
+    <pre id="response"></pre>
+
+    <!--
+    <h1 style="margin-top: 40px;">Read the Current Full Job Market Report</h1>
+    <textarea
+    style="width: 96%; height: 300px; font-size: 18px; margin-bottom: 10px; margin-top: 30px; white-space: pre; overflow-x: auto;">
+    {{ bls_raw }}
+    </textarea>
+    -->
+    <div id="div1">
+        <script>
+            function generateResponse() {
+                const systemMessage = document.getElementById('system_message').value;
+
+
+                $.ajax({
+                    url: '/generate',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ system_message: systemMessage}),
+                    success: function(response) {
+                        document.getElementById('response').textContent = response.content;
+                    }
+                });
+            }
+
+            function queryLink(e) {
+                const systemMessage = e.innerText;
+                $.ajax({
+                    url: '/clickable_query',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ system_message: systemMessage }),
+                    success: function(response) {
+                        document.getElementById('response').textContent = response.content;
+                    }
+                });
+            }
+
+
+            // Fetch the sentiment output from the /sentiment route
+            function fetchSentiment() {
+                $.ajax({
+                    url: '/sentiment',
+                    method: 'POST',
+                    success: function(response) {
+                        document.getElementById('sentiment_output').textContent = response.content;
+                    }
+                });
+            }
+
+            // Fetch the sentiment when the page loads
+            $(document).ready(function() {
+                fetchSentiment();
+            });
+
+
+            // Fetch the Federal Reserve sentiment output from the /sentiment route
+            function fetchFedSentiment() {
+                $.ajax({
+                    url: '/fed_sentiment',
+                    method: 'POST',
+                    success: function(response) {
+                        document.getElementById('fed_sentiment_output').textContent = response.content;
+                    }
+                });
+            }
+
+            // Fetch the sentiment when the page loads
+            $(document).ready(function() {
+                fetchFedSentiment();
+            });
+
+
+            // Fetch the ABI sentiment output from the /sentiment route
+            function fetchAbiSentiment() {
+                $.ajax({
+                    url: '/abi',
+                    method: 'POST',
+                    success: function(response) {
+                        document.getElementById('abi_sentiment_output').textContent = response.content;
+                    }
+                });
+            }
+
+            // Fetch the sentiment when the page loads
+            $(document).ready(function() {
+                fetchAbiSentiment();
+            });
+
+
+            // Fetch the Combined sentiment output from the /sentiment route
+            function fetchCombinedSentiment() {
+                $.ajax({
+                    url: '/combined',
+                    method: 'POST',
+                    success: function(response) {
+                        document.getElementById('combined_sentiment_output').textContent = response.content;
+                    }
+                });
+            }
+
+            // Fetch the sentiment when the page loads
+            $(document).ready(function() {
+                fetchCombinedSentiment();
+            });
+
+
+            // Fetch the numerical output from the /numerical_rating
+            function numericalRating() {
+                $.ajax({
+                    url: '/numerical_rating',
+                    method: 'POST',
+                    success: function(response) {
+                        document.getElementById('numerical_rating').textContent = response.content;
+                    }
+                });
+            }
+
+            // Fetch the sentiment when the page loads
+            $(document).ready(function() {
+                numericalRating();
+            });
+        </script>
+    </div>
+
+</body>
+</html>
